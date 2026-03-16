@@ -1,4 +1,76 @@
 // ============================================================
+// Configuración Supabase
+// ============================================================
+const SUPABASE_URL = 'https://qbdpnyjwnuxolwzuyvxu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ksWwEwuIFs6VqKTETMQZkQ_AlUARp3N';
+
+async function saveToSupabase() {
+    try {
+        // Calcular RT promedio
+        const rts    = AppState.results.filter(r => r.rt !== null && r.selected !== 'Omision').map(r => r.rt / 1000);
+        const avgRt  = rts.length ? parseFloat((rts.reduce((a, b) => a + b, 0) / rts.length).toFixed(2)) : null;
+
+        // Puntuaciones por emoción
+        const perEmo = {};
+        AppState.emotions.forEach(emo => {
+            perEmo[emo] = AppState.results.filter(r => r.correct === emo && r.isHit).length;
+        });
+
+        // Z-score global
+        const norm   = AppState.normativeCutoffs.total;
+        const zScore = parseFloat(((AppState.aciertos - norm.mean) / norm.sd).toFixed(2));
+
+        const payload = {
+            fecha:              new Date().toISOString().split('T')[0],
+            hora:               new Date().toTimeString().split(' ')[0],
+            identificador:      AppState.patientName,
+            edad:               AppState.patientAge,
+            sexo:               AppState.patientSex,
+            educacion:          AppState.patientEducation,
+            condicion:          AppState.patientDiagnosis,
+            notas_clinicas:     AppState.patientCondition || null,
+            aciertos_total:     AppState.aciertos,
+            errores_total:      AppState.errores,
+            omisiones_total:    AppState.omisiones,
+            pct_global:         Math.round((AppState.aciertos / 36) * 100),
+            rt_promedio_s:      avgRt,
+            aciertos_alegria:   perEmo['Alegria'],
+            aciertos_tristeza:  perEmo['Tristeza'],
+            aciertos_enfado:    perEmo['Enfado'],
+            aciertos_miedo:     perEmo['Miedo'],
+            aciertos_asco:      perEmo['Asco'],
+            aciertos_neutral:   perEmo['Neutral'],
+            z_score:            zScore,
+            version_app:        '2.0',
+            pais:               'Colombia'
+        };
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/evaluaciones`, {
+            method:  'POST',
+            headers: {
+                'Content-Type':  'application/json',
+                'apikey':        SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Prefer':        'return=minimal'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            console.error('Supabase error:', err);
+            return false;
+        }
+
+        return true;
+
+    } catch (e) {
+        console.error('Error al guardar en Supabase:', e);
+        return false;
+    }
+}
+
+// ============================================================
 // Estado de la aplicación
 // ============================================================
 const AppState = {
@@ -410,11 +482,17 @@ function buildCutoffAlert(pct) {
 // ============================================================
 // Exportación Excel enriquecida
 // ============================================================
-function downloadExcel() {
+async function downloadExcel() {
     if (typeof XLSX === 'undefined') {
         alert("La librería de descarga no se ha cargado. Intenta recargar la página.");
         return;
     }
+
+    // Guardar en Supabase en paralelo (silencioso, no bloquea la descarga)
+    saveToSupabase().then(ok => {
+        if (ok) console.log('✓ Datos guardados en Supabase');
+        else    console.warn('⚠ No se pudieron guardar en Supabase');
+    });
 
     const wb = XLSX.utils.book_new();
 
