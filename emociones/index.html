@@ -3,122 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test de Reconocimiento de Emociones</title>
+    <title>Prueba de Reconocimiento de Emociones Facial</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-    <div id="app-container">
-        
-        <!-- Pantalla de Inicio -->
-        <section id="screen-start" class="screen active">
-            <div class="card glass-effect">
-                <h1>Prueba de Reconocimiento de Emociones Facial</h1>
-                <p class="subtitle">Evaluación de Inteligencia Emocional</p>
-                
-                <div class="instructions-box">
-                    <h3>Instrucciones de Evaluación</h3>
-                    <ul>
-                        <li>Se presentará una secuencia de imágenes faciales.</li>
-                        <li>El objetivo es identificar la emoción principal que expresa el sujeto en fotografía.</li>
-                        <li>Las imágenes de control (reversos de las cartas) sirven de pausa visual entre estímulos; no requieren valoración.</li>
-                        <li>Por favor, responda con la mayor precisión posible. No hay límite de tiempo estricto.</li>
-                    </ul>
-                </div>
+<div id="app-container">
 
-                <div class="input-group">
-                    <label for="patient-name">Identificador del Paciente:</label>
+    <!-- ══════════════════════════════════════════
+         PANTALLA 1: INICIO / DATOS DEMOGRÁFICOS
+    ══════════════════════════════════════════ -->
+    <section id="screen-start" class="screen active">
+        <div class="card glass-effect">
+            <h1>Prueba de Reconocimiento de Emociones Facial</h1>
+            <p class="subtitle">Evaluación de Cognición Social · Versión 36 Ítems</p>
+
+            <div class="instructions-box">
+                <h3>Instrucciones de Evaluación</h3>
+                <ul>
+                    <li>Se presentará una secuencia de imágenes faciales intercaladas con cartas de pausa.</li>
+                    <li>El objetivo es identificar la emoción principal que expresa el rostro fotografiado.</li>
+                    <li>Las imágenes de control (reversos) no requieren respuesta — pulse <em>Continuar</em>.</li>
+                    <li>Responda con la mayor precisión posible. No hay límite de tiempo estricto.</li>
+                </ul>
+            </div>
+
+            <!-- ── Datos del Paciente ── -->
+            <div class="form-section-title">Datos del Evaluado</div>
+
+            <div class="form-grid">
+                <div class="input-group input-group--full">
+                    <label for="patient-name">Identificador / Nombre del Paciente <span class="required">*</span></label>
                     <input type="text" id="patient-name" placeholder="Ej. ID-405 o Nombre completo" autocomplete="off">
                 </div>
 
-                <button id="btn-start" class="btn-primary" disabled>Comenzar Evaluación</button>
-            </div>
-        </section>
-
-        <!-- Pantalla del Test -->
-        <section id="screen-test" class="screen hidden">
-            <header class="test-header">
-                <div class="patient-info">Paciente: <span id="display-name">---</span></div>
-                <div class="progress-info">Imagen: <span id="current-image-num">1</span> / 72 (Rostro: <span id="face-count">1</span>/36)</div>
-            </header>
-
-            <div class="progress-bar-container">
-                <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
-            </div>
-
-            <main class="test-content">
-                <div class="image-container glass-effect">
-                    <!-- Spinner de carga -->
-                    <div id="image-loader" class="loader"></div>
-                    <img id="emotion-image" src="images/1.png" alt="Rostro a evaluar" style="display: none;">
+                <div class="input-group">
+                    <label for="patient-age">Edad (años) <span class="required">*</span></label>
+                    <input type="number" id="patient-age" placeholder="Ej. 35" min="5" max="110">
                 </div>
 
-                <!-- Panel de opciones, solo visible cuando es un rostro -->
-                <div id="options-panel">
-                    <div class="options-grid">
-                        <button class="btn-emotion btn-alegria" data-emotion="Alegria">Alegría</button>
-                        <button class="btn-emotion btn-tristeza" data-emotion="Tristeza">Tristeza</button>
-                        <button class="btn-emotion btn-enfado" data-emotion="Enfado">Enfado</button>
-                        <button class="btn-emotion btn-miedo" data-emotion="Miedo">Miedo / Sorpresa</button>
-                        <button class="btn-emotion btn-asco" data-emotion="Asco">Asco</button>
-                        <button class="btn-emotion btn-neutral" data-emotion="Neutral">Inexpresividad</button>
-                    </div>
-                    <div class="omision-footer">
-                        <button class="btn-emotion btn-omision" data-emotion="Omision">El paciente no responde (Omitir)</button>
-                    </div>
-                </div>
-                
-                <!-- Botón de avance, visible solo cuando es un reverso -->
-                <div id="reverse-panel" class="reverse-actions hidden">
-                    <button id="btn-next-from-reverse" class="btn-secondary">Continuar Siguiente Estímulo</button>
+                <div class="input-group">
+                    <label for="patient-sex">Sexo <span class="required">*</span></label>
+                    <select id="patient-sex">
+                        <option value="">— Seleccionar —</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                        <option value="O">Otro / No informa</option>
+                    </select>
                 </div>
 
-            </main>
-        </section>
-
-        <!-- Pantalla de Resultados -->
-        <section id="screen-results" class="screen hidden">
-            <div class="card glass-effect results-card">
-                <h2>Resultados de la Evaluación</h2>
-                <div class="results-summary">
-                    <p><strong>Paciente:</strong> <span id="result-name">---</span></p>
-                    <p><strong>Rostros Evaluados:</strong> 36</p>
-                    
-                    <div class="score-circle">
-                        <svg viewBox="0 0 36 36" class="circular-chart">
-                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="score-circle-path" class="circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <text x="18" y="20.35" class="percentage" id="score-percentage">0%</text>
-                        </svg>
-                        <div class="score-text">Precisión Global</div>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="stat-box aciertos">
-                            <span class="stat-value" id="total-aciertos">0</span>
-                            <span class="stat-label">Aciertos</span>
-                        </div>
-                        <div class="stat-box errores">
-                            <span class="stat-value" id="total-errores">0</span>
-                            <span class="stat-label">Desaciertos</span>
-                        </div>
-                        <div class="stat-box omisiones">
-                            <span class="stat-value" id="total-omisiones">0</span>
-                            <span class="stat-label">Omisiones</span>
-                        </div>
-                    </div>
+                <div class="input-group">
+                    <label for="patient-education">Nivel Educativo <span class="required">*</span></label>
+                    <select id="patient-education">
+                        <option value="">— Seleccionar —</option>
+                        <option value="primaria">Primaria</option>
+                        <option value="secundaria">Secundaria / Bachillerato</option>
+                        <option value="tecnico">Técnico / Tecnológico</option>
+                        <option value="universitario">Universitario</option>
+                        <option value="posgrado">Posgrado</option>
+                    </select>
                 </div>
 
-                <div class="action-buttons-end">
-                    <button id="btn-restart" class="btn-secondary">Nueva Evaluación</button>
-                    <button id="btn-download" class="btn-primary">Descargar Reporte (.ods)</button>
+                <div class="input-group">
+                    <label for="patient-diagnosis">Condición <span class="required">*</span></label>
+                    <select id="patient-diagnosis">
+                        <option value="">— Seleccionar —</option>
+                        <option value="control">Control sano (sin diagnóstico)</option>
+                        <option value="paciente">Paciente clínico</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="patient-condition">Notas clínicas / Diagnóstico <small>(opcional)</small></label>
+                    <input type="text" id="patient-condition" placeholder="Ej. TCA, TCE, Demencia…">
                 </div>
             </div>
-        </section>
 
-    </div>
-    
-    <script src="app.js"></script>
+            <p class="form-note"><span class="required">*</span> Campos obligatorios para registro normativo</p>
+
+            <button id="btn-start" class="btn-primary" disabled>Comenzar Evaluación</button>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         PANTALLA 2: TEST
+    ══════════════════════════════════════════ -->
+    <section id="screen-test" class="screen hidden">
+        <header class="test-header">
+            <div class="patient-info">Paciente: <span id="display-name">---</span></div>
+            <div class="progress-info">
+                Imagen: <span id="current-image-num">1</span> / 72
+                &nbsp;·&nbsp;
+                Rostro: <span id="face-count">1</span>/36
+            </div>
+        </header>
+
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+
+        <main class="test-content">
+            <div class="image-container">
+                <div id="image-loader" class="loader"></div>
+                <img id="emotion-image" src="" alt="Rostro a evaluar" style="display:none;">
+            </div>
+
+            <!-- Panel emociones -->
+            <div id="options-panel">
+                <div class="options-grid">
+                    <button class="btn-emotion btn-alegria"  data-emotion="Alegria">😊 Alegría</button>
+                    <button class="btn-emotion btn-tristeza" data-emotion="Tristeza">😢 Tristeza</button>
+                    <button class="btn-emotion btn-enfado"   data-emotion="Enfado">😠 Enfado</button>
+                    <button class="btn-emotion btn-miedo"    data-emotion="Miedo">😨 Miedo / Sorpresa</button>
+                    <button class="btn-emotion btn-asco"     data-emotion="Asco">🤢 Asco</button>
+                    <button class="btn-emotion btn-neutral"  data-emotion="Neutral">😐 Inexpresividad</button>
+                </div>
+                <div class="omision-footer">
+                    <button class="btn-emotion btn-omision" data-emotion="Omision">El paciente no responde (Omitir)</button>
+                </div>
+            </div>
+
+            <!-- Panel reverso -->
+            <div id="reverse-panel" class="reverse-actions hidden">
+                <p class="reverse-hint">Carta de pausa — no requiere respuesta</p>
+                <button id="btn-next-from-reverse" class="btn-secondary">Continuar Siguiente Estímulo →</button>
+            </div>
+        </main>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         PANTALLA 3: RESULTADOS
+    ══════════════════════════════════════════ -->
+    <section id="screen-results" class="screen hidden">
+        <div class="card glass-effect results-card">
+            <h2>Resultados de la Evaluación</h2>
+
+            <!-- Resumen del paciente -->
+            <div class="patient-summary-box">
+                <div class="ps-row">
+                    <span class="ps-label">Paciente:</span>
+                    <span id="result-name" class="ps-value">—</span>
+                </div>
+                <div class="ps-row">
+                    <span class="ps-label">Edad:</span>
+                    <span id="result-age" class="ps-value">—</span>
+                    <span class="ps-label ps-sep">Sexo:</span>
+                    <span id="result-sex" class="ps-value">—</span>
+                </div>
+                <div class="ps-row">
+                    <span class="ps-label">Educación:</span>
+                    <span id="result-education" class="ps-value">—</span>
+                </div>
+                <div class="ps-row">
+                    <span class="ps-label">Condición:</span>
+                    <span id="result-diagnosis" class="ps-value">—</span>
+                </div>
+            </div>
+
+            <!-- Gráfica circular + estadísticas -->
+            <div class="results-summary">
+                <div class="score-circle">
+                    <svg viewBox="0 0 36 36" class="circular-chart">
+                        <path class="circle-bg"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        <path id="score-circle-path" class="circle"
+                              stroke-dasharray="0, 100"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        <text x="18" y="20.35" class="percentage" id="score-percentage">0%</text>
+                    </svg>
+                    <div class="score-text">Precisión Global (36 ítems)</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box aciertos">
+                        <span class="stat-value" id="total-aciertos">0</span>
+                        <span class="stat-label">Aciertos</span>
+                    </div>
+                    <div class="stat-box errores">
+                        <span class="stat-value" id="total-errores">0</span>
+                        <span class="stat-label">Errores</span>
+                    </div>
+                    <div class="stat-box omisiones">
+                        <span class="stat-value" id="total-omisiones">0</span>
+                        <span class="stat-label">Omisiones</span>
+                    </div>
+                    <div class="stat-box rt">
+                        <span class="stat-value" id="avg-response-time">—</span>
+                        <span class="stat-label">TR Promedio</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerta de punto de corte clínico -->
+            <div id="cutoff-alert" class="cutoff-alert"></div>
+
+            <!-- Perfil por emoción -->
+            <div class="profile-section">
+                <h3 class="profile-title">Perfil por Emoción</h3>
+                <div class="table-wrap">
+                    <table class="emotion-table">
+                        <thead>
+                            <tr>
+                                <th>Emoción</th>
+                                <th>Aciertos</th>
+                                <th>Errores</th>
+                                <th>Omisiones</th>
+                                <th>% Acierto</th>
+                                <th>Estado</th>
+                                <th>Principal confusión</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emotion-profile-body">
+                        </tbody>
+                    </table>
+                </div>
+                <p class="table-note">
+                    Estado calculado con punto de corte: <em>media − 1.5 DT</em>
+                    (referencia normativa provisional — baremo español, adaptado a 36 ítems).
+                </p>
+            </div>
+
+            <!-- Acciones -->
+            <div class="action-buttons-end">
+                <button id="btn-restart" class="btn-secondary">Nueva Evaluación</button>
+                <button id="btn-download" class="btn-primary">⬇ Descargar Reporte (.ods)</button>
+            </div>
+        </div>
+    </section>
+
+</div>
+<script src="app.js"></script>
 </body>
 </html>
