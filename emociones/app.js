@@ -2,7 +2,7 @@
 // Configuración Supabase
 // ============================================================
 const SUPABASE_URL = 'https://qbdpnyjwnuxolwzuyvxu.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_ksWwEwuIFs6VqKTETMQZkQ_AlUARp3N';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZHBueWp3bnV4b2x3enV5dnh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzI2MDMsImV4cCI6MjA4OTI0ODYwM30.hLjiHYI74a8UpKvyx5s-rgShdcSMyTaI6dnAjQs0HTY';
 
 async function saveToSupabase() {
     try {
